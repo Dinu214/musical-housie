@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Music, Play, RotateCcw, Disc, RefreshCw, Undo } from 'lucide-react';
 
 // Define the song data structure
@@ -8,25 +8,57 @@ interface SongData {
   fileName: string;
 }
 
+// Key for localStorage
+const STORAGE_KEY = 'musicalHousieState';
+
 function App() {
   // Hardcoded 60 numbers
   const allNumbers = Array.from({ length: 60 }, (_, i) => i + 1);
-  
-  const [availableNumbers, setAvailableNumbers] = useState<number[]>(allNumbers);
-  const [selectedNumbers, setSelectedNumbers] = useState<number[]>([]);
-  const [currentNumber, setCurrentNumber] = useState<number | null>(null);
+
+  // Load state from localStorage or initialize defaults
+  const loadState = () => {
+    const savedState = localStorage.getItem(STORAGE_KEY);
+    if (savedState) {
+      return JSON.parse(savedState);
+    }
+    return {
+      availableNumbers: allNumbers,
+      selectedNumbers: [],
+      currentNumber: null,
+      currentSong: null,
+      lastRemovedNumber: null,
+      lastRemovedSong: null,
+    };
+  };
+
+  const [availableNumbers, setAvailableNumbers] = useState<number[]>(loadState().availableNumbers);
+  const [selectedNumbers, setSelectedNumbers] = useState<number[]>(loadState().selectedNumbers);
+  const [currentNumber, setCurrentNumber] = useState<number | null>(loadState().currentNumber);
   const [isSpinning, setIsSpinning] = useState(false);
-  const [currentSong, setCurrentSong] = useState<SongData | null>(null);
+  const [currentSong, setCurrentSong] = useState<SongData | null>(loadState().currentSong);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const spinAudioRef = useRef<HTMLAudioElement | null>(null); // New ref for spin background music
+  const spinAudioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string>('');
   const [fullscreenSpin, setFullscreenSpin] = useState(false);
-  const [showConfirmation, setShowConfirmation] = useState<{show: boolean, type: 'revert' | 'reset', message: string} | null>(null);
-  const [lastRemovedNumber, setLastRemovedNumber] = useState<number | null>(null);
-  const [lastRemovedSong, setLastRemovedSong] = useState<SongData | null>(null);
+  const [showConfirmation, setShowConfirmation] = useState<{ show: boolean; type: 'revert' | 'reset'; message: string } | null>(null);
+  const [lastRemovedNumber, setLastRemovedNumber] = useState<number | null>(loadState().lastRemovedNumber);
+  const [lastRemovedSong, setLastRemovedSong] = useState<SongData | null>(loadState().lastRemovedSong);
 
-  // Sample song data - in a real app, you would have all 60 songs
+  // Save state to localStorage whenever it changes
+  useEffect(() => {
+    const state = {
+      availableNumbers,
+      selectedNumbers,
+      currentNumber,
+      currentSong,
+      lastRemovedNumber,
+      lastRemovedSong,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }, [availableNumbers, selectedNumbers, currentNumber, currentSong, lastRemovedNumber, lastRemovedSong]);
+
+  // Sample song data
   const songData: SongData[] = [
     { id: 1, songName: "Woh Kisna hai", fileName: "1. Woh Kisna hai.mp3" },
     { id: 2, songName: "Go Go Govinda", fileName: "2. Go Go Govinda.mp3" },
@@ -89,9 +121,8 @@ function App() {
     { id: 59, songName: "Eni Sadhutane Vaari Jau Re", fileName: "59.Eni Sadhutane Vaari Jau Re.....mp3" },
     { id: 60, songName: "Hari Swami Aavya Re", fileName: "60.Hari Swami Aavya Re.mp3" }
   ];
-  
-  
-  
+
+  // Generate random number
   const generateRandomNumber = () => {
     if (availableNumbers.length === 0) {
       alert("All numbers have been selected!");
@@ -100,20 +131,18 @@ function App() {
 
     setIsSpinning(true);
     setFullscreenSpin(true);
-    
-    // Start the spinning background music
+
     if (spinAudioRef.current) {
-      spinAudioRef.current.currentTime = 0; // Reset to beginning
+      spinAudioRef.current.currentTime = 0;
       spinAudioRef.current.play().catch(e => console.error("Error playing spin sound:", e));
     }
-    
-    // Simulate spinning animation with multiple random numbers
+
     let spinCount = 0;
-    const maxSpins = 40; // About 4 seconds of animation
+    const maxSpins = 40;
     const spinInterval = setInterval(() => {
       const randomIndex = Math.floor(Math.random() * availableNumbers.length);
       setCurrentNumber(availableNumbers[randomIndex]);
-      
+
       spinCount++;
       if (spinCount >= maxSpins) {
         clearInterval(spinInterval);
@@ -123,32 +152,26 @@ function App() {
   };
 
   const finalizeSelection = () => {
-    // Select the final number
     const randomIndex = Math.floor(Math.random() * availableNumbers.length);
     const selectedNumber = availableNumbers[randomIndex];
-    
-    // Update states
+
     setCurrentNumber(selectedNumber);
     setSelectedNumbers(prev => [...prev, selectedNumber]);
-    
-    // Find the song for the selected number
+
     const song = songData.find(song => song.id === selectedNumber);
     if (song) {
       setCurrentSong(song);
     }
-    
-    // Remove the selected number from available numbers
+
     const updatedAvailableNumbers = availableNumbers.filter(num => num !== selectedNumber);
     setAvailableNumbers(updatedAvailableNumbers);
-    
-    // Clear last removed data
+
     setLastRemovedNumber(null);
     setLastRemovedSong(null);
-    
-    // Keep fullscreen mode for 2 seconds after spinning stops
+
     setTimeout(() => {
       setIsSpinning(false);
-      
+
       setTimeout(() => {
         setFullscreenSpin(false);
       }, 2000);
@@ -168,18 +191,9 @@ function App() {
   };
 
   // Reset audio playing state when song changes
-  React.useEffect(() => {
+  useEffect(() => {
     setIsPlaying(false);
   }, [currentSong]);
-
-  // Function to handle logo upload
-  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setLogoUrl(url);
-    }
-  };
 
   // Revert last selection
   const revertLastSelection = () => {
@@ -188,30 +202,23 @@ function App() {
       return;
     }
 
-    // Get the last selected number
     const lastNumber = selectedNumbers[selectedNumbers.length - 1];
-    
-    // Save it for potential undo
     setLastRemovedNumber(lastNumber);
-    
-    // Find the song for this number
+
     const lastSong = songData.find(song => song.id === lastNumber);
     if (lastSong) {
       setLastRemovedSong(lastSong);
     }
-    
-    // Remove it from selected numbers
+
     const newSelectedNumbers = selectedNumbers.slice(0, -1);
     setSelectedNumbers(newSelectedNumbers);
-    
-    // Add it back to available numbers
+
     setAvailableNumbers([...availableNumbers, lastNumber]);
-    
-    // Update current number and song
+
     if (newSelectedNumbers.length > 0) {
       const newCurrentNumber = newSelectedNumbers[newSelectedNumbers.length - 1];
       setCurrentNumber(newCurrentNumber);
-      
+
       const newCurrentSong = songData.find(song => song.id === newCurrentNumber);
       if (newCurrentSong) {
         setCurrentSong(newCurrentSong);
@@ -220,31 +227,31 @@ function App() {
       setCurrentNumber(null);
       setCurrentSong(null);
     }
-    
-    // Close confirmation dialog
+
     setShowConfirmation(null);
   };
 
   // Reset all selections
   const resetAllSelections = () => {
-    // Initialize all numbers as available
     setAvailableNumbers(allNumbers);
     setSelectedNumbers([]);
     setCurrentNumber(null);
     setCurrentSong(null);
     setLastRemovedNumber(null);
     setLastRemovedSong(null);
-    
-    // Close confirmation dialog
+
+    // Clear localStorage
+    localStorage.removeItem(STORAGE_KEY);
+
     setShowConfirmation(null);
   };
 
   // Show confirmation dialog
   const showConfirmationDialog = (type: 'revert' | 'reset') => {
-    const message = type === 'revert' 
-      ? "Are you sure you want to revert the last selection?" 
+    const message = type === 'revert'
+      ? "Are you sure you want to revert the last selection?"
       : "Are you sure you want to reset all selections? This cannot be undone.";
-    
+
     setShowConfirmation({ show: true, type, message });
   };
 
@@ -394,7 +401,6 @@ function App() {
                 onError={(e) => console.error("Audio error:", e)}
               />
             </div>
-            
           )}
         </div>
 
