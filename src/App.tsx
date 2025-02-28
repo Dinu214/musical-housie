@@ -18,6 +18,7 @@ function App() {
   const [isSpinning, setIsSpinning] = useState(false);
   const [currentSong, setCurrentSong] = useState<SongData | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const spinAudioRef = useRef<HTMLAudioElement | null>(null); // New ref for spin background music
   const [isPlaying, setIsPlaying] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string>('');
   const [fullscreenSpin, setFullscreenSpin] = useState(false);
@@ -27,67 +28,69 @@ function App() {
 
   // Sample song data - in a real app, you would have all 60 songs
   const songData: SongData[] = [
-    { id: 1, songName: "Shape of You - Ed Sheeran", fileName: "shape-of-you.mp3" },
-    { id: 2, songName: "Blinding Lights - The Weeknd", fileName: "blinding-lights.mp3" },
-    { id: 3, songName: "Dance Monkey - Tones and I", fileName: "dance-monkey.mp3" },
-    { id: 4, songName: "Uptown Funk - Mark Ronson ft. Bruno Mars", fileName: "uptown-funk.mp3" },
-    { id: 5, songName: "Despacito - Luis Fonsi ft. Daddy Yankee", fileName: "despacito.mp3" },
-    { id: 6, songName: "Someone Like You - Adele", fileName: "someone-like-you.mp3" },
-    { id: 7, songName: "Bad Guy - Billie Eilish", fileName: "bad-guy.mp3" },
-    { id: 8, songName: "Thinking Out Loud - Ed Sheeran", fileName: "thinking-out-loud.mp3" },
-    { id: 9, songName: "Shallow - Lady Gaga & Bradley Cooper", fileName: "shallow.mp3" },
-    { id: 10, songName: "Hello - Adele", fileName: "hello.mp3" },
-    { id: 11, songName: "Stay With Me - Sam Smith", fileName: "stay-with-me.mp3" },
-    { id: 12, songName: "Rolling in the Deep - Adele", fileName: "rolling-in-the-deep.mp3" },
-    { id: 13, songName: "Shake It Off - Taylor Swift", fileName: "shake-it-off.mp3" },
-    { id: 14, songName: "Happy - Pharrell Williams", fileName: "happy.mp3" },
-    { id: 15, songName: "All of Me - John Legend", fileName: "all-of-me.mp3" },
-    { id: 16, songName: "Roar - Katy Perry", fileName: "roar.mp3" },
-    { id: 17, songName: "Can't Stop the Feeling! - Justin Timberlake", fileName: "cant-stop-the-feeling.mp3" },
-    { id: 18, songName: "Havana - Camila Cabello", fileName: "havana.mp3" },
-    { id: 19, songName: "Perfect - Ed Sheeran", fileName: "perfect.mp3" },
-    { id: 20, songName: "Don't Start Now - Dua Lipa", fileName: "dont-start-now.mp3" },
-    { id: 21, songName: "Watermelon Sugar - Harry Styles", fileName: "watermelon-sugar.mp3" },
-    { id: 22, songName: "Levitating - Dua Lipa", fileName: "levitating.mp3" },
-    { id: 23, songName: "drivers license - Olivia Rodrigo", fileName: "drivers-license.mp3" },
-    { id: 24, songName: "good 4 u - Olivia Rodrigo", fileName: "good-4-u.mp3" },
-    { id: 25, songName: "Stay - The Kid LAROI & Justin Bieber", fileName: "stay.mp3" },
-    { id: 26, songName: "Butter - BTS", fileName: "butter.mp3" },
-    { id: 27, songName: "Save Your Tears - The Weeknd", fileName: "save-your-tears.mp3" },
-    { id: 28, songName: "Dynamite - BTS", fileName: "dynamite.mp3" },
-    { id: 29, songName: "positions - Ariana Grande", fileName: "positions.mp3" },
-    { id: 30, songName: "Mood - 24kGoldn ft. iann dior", fileName: "mood.mp3" },
-    { id: 31, songName: "Heat Waves - Glass Animals", fileName: "heat-waves.mp3" },
-    { id: 32, songName: "Montero - Lil Nas X", fileName: "montero.mp3" },
-    { id: 33, songName: "Kiss Me More - Doja Cat ft. SZA", fileName: "kiss-me-more.mp3" },
-    { id: 34, songName: "Peaches - Justin Bieber", fileName: "peaches.mp3" },
-    { id: 35, songName: "Leave the Door Open - Silk Sonic", fileName: "leave-the-door-open.mp3" },
-    { id: 36, songName: "Shivers - Ed Sheeran", fileName: "shivers.mp3" },
-    { id: 37, songName: "Industry Baby - Lil Nas X", fileName: "industry-baby.mp3" },
-    { id: 38, songName: "Bad Habits - Ed Sheeran", fileName: "bad-habits.mp3" },
-    { id: 39, songName: "Easy On Me - Adele", fileName: "easy-on-me.mp3" },
-    { id: 40, songName: "Cold Heart - Elton John & Dua Lipa", fileName: "cold-heart.mp3" },
-    { id: 41, songName: "abcdefu - GAYLE", fileName: "abcdefu.mp3" },
-    { id: 42, songName: "Enemy - Imagine Dragons", fileName: "enemy.mp3" },
-    { id: 43, songName: "Super Gremlin - Kodak Black", fileName: "super-gremlin.mp3" },
-    { id: 44, songName: "Ghost - Justin Bieber", fileName: "ghost.mp3" },
-    { id: 45, songName: "Woman - Doja Cat", fileName: "woman.mp3" },
-    { id: 46, songName: "Need to Know - Doja Cat", fileName: "need-to-know.mp3" },
-    { id: 47, songName: "Happier Than Ever - Billie Eilish", fileName: "happier-than-ever.mp3" },
-    { id: 48, songName: "Thats What I Want - Lil Nas X", fileName: "thats-what-i-want.mp3" },
-    { id: 49, songName: "My Universe - Coldplay X BTS", fileName: "my-universe.mp3" },
-    { id: 50, songName: "Fancy Like - Walker Hayes", fileName: "fancy-like.mp3" },
-    { id: 51, songName: "Smokin Out The Window - Silk Sonic", fileName: "smokin-out-the-window.mp3" },
-    { id: 52, songName: "Essence - Wizkid ft. Tems", fileName: "essence.mp3" },
-    { id: 53, songName: "Rumors - Lizzo ft. Cardi B", fileName: "rumors.mp3" },
-    { id: 54, songName: "Beggin - Måneskin", fileName: "beggin.mp3" },
-    { id: 55, songName: "Traitor - Olivia Rodrigo", fileName: "traitor.mp3" },
-    { id: 56, songName: "Better Days - NEIKED x Mae Muller x Polo G", fileName: "better-days.mp3" },
-    { id: 57, songName: "Love Nwantiti - CKay", fileName: "love-nwantiti.mp3" },
-    { id: 58, songName: "Sacrifice - The Weeknd", fileName: "sacrifice.mp3" },
-    { id: 59, songName: "Big Energy - Latto", fileName: "big-energy.mp3" },
-    { id: 60, songName: "Light Switch - Charlie Puth", fileName: "light-switch.mp3" }
+    { id: 1, songName: "Woh Kisna hai", fileName: "1. Woh Kisna hai.mp3" },
+    { id: 2, songName: "Go Go Govinda", fileName: "2. Go Go Govinda.mp3" },
+    { id: 3, songName: "Shiv Tandav", fileName: "3. Shiv Tandav.mp3" },
+    { id: 4, songName: "Virpur Javu Ke", fileName: "4. virpur javu ke.mp3" },
+    { id: 5, songName: "Mata Sherawali", fileName: "5. Mata sherawali.mp3" },
+    { id: 6, songName: "Hu Gokul No Govadiyo", fileName: "6. Hu Gokul No Govadiyo.mp3" },
+    { id: 7, songName: "Aaya Hai Toofan", fileName: "07. AAYA HAI TOOFAN.m4a" },
+    { id: 8, songName: "Ghor Andhari Re", fileName: "8. ghor andhari re.mp3" },
+    { id: 9, songName: "Rasiyo Rupalo", fileName: "9. Rasiyo Rupalo.mp3" },
+    { id: 10, songName: "Gori Radha", fileName: "10. Gori Radha.mp3" },
+    { id: 11, songName: "Rang Bhini Radha", fileName: "11. Rang Bhini Radha.mp3" },
+    { id: 12, songName: "Mor Bani Thanghat Kare", fileName: "12. Mor Bani Thanghat Kare.mp3" },
+    { id: 13, songName: "Nagar Nandji Na Lal", fileName: "13. nagar nandji na lal.mp3" },
+    { id: 14, songName: "Ekadantaya Vakratundaya", fileName: "14. Ekadantaya Vakratundaya.mp3" },
+    { id: 15, songName: "India Wale", fileName: "15. India Wale.mp3" },
+    { id: 16, songName: "Chak De India", fileName: "16. Chak De India.mp3" },
+    { id: 17, songName: "Ranchod Rangila", fileName: "17. Ranchod Rangila.mp3" },
+    { id: 18, songName: "Ram Aayenge", fileName: "18. Ram Aayenge.mp3" },
+    { id: 19, songName: "Bhai Bandh Ma Ghano Fer Se", fileName: "19. Bhai bandh ma ghano fer se.mp3" },
+    { id: 20, songName: "Dwarika No Nath", fileName: "20. Dwarika No Nath.mp3" },
+    { id: 21, songName: "E Ri Sakhi Mangal Gaavo RE", fileName: "21. E Ri Sakhi Mangal Gaavo RE.mp3" },
+    { id: 22, songName: "Tame Kadiya Maliya", fileName: "22. TAME KADIYA MALIYA.mp3" },
+    { id: 23, songName: "Aavo Swami Bhale Padharya", fileName: "23. Aavo Swami Bhale Padharya.mp3" },
+    { id: 24, songName: "Hari Maro Jhalo Haath", fileName: "24. Hari Maro Jhalo Haath.mp3" },
+    { id: 25, songName: "Shivaji Halaradu", fileName: "25. SHIVAJI HALARADU.mp4" },
+    { id: 26, songName: "Dhanya Dhanya Avasar Aayo Re", fileName: "26. Dhanya Dhanya Avasar Aayo Re.mp3" },
+    { id: 27, songName: "Rang Lagyo", fileName: "27. Rang Lagyo.mp3" },
+    { id: 28, songName: "Samarpit Samarpit", fileName: "28. Samarpit Samarpit.mp3" },
+    { id: 29, songName: "Bolya Shree Hari Re", fileName: "29. Bolya Shree Hari Re.mp3" },
+    { id: 30, songName: "Kesariya Mane Ho", fileName: "30. Kesariya  Mane ho.mp3" },
+    { id: 31, songName: "Purshottam Pragat Malya", fileName: "31. Purshottam Pragat malya.mp3" },
+    { id: 32, songName: "Moghra Na Fool", fileName: "32. moghra na fool.mp3" },
+    { id: 33, songName: "Mare Mandir Mahle Re", fileName: "33. Mare Mandir Mahle Re.mp3" },
+    { id: 34, songName: "Aaj Suvarna Avasar", fileName: "34. Aaj Suvarna Avasar.mp3" },
+    { id: 35, songName: "Sabse Uonchi", fileName: "35. Sabse Uonchi.mp3" },
+    { id: 36, songName: "Jode Chho Maharaj", fileName: "36. Jode Chho Maharaj.mp3" },
+    { id: 37, songName: "Dil Tum Tum Kare", fileName: "37. Dil Tum Tum Kare.mp3" },
+    { id: 38, songName: "Padharya Padharya", fileName: "38. PADHARYA PADHARYA.m4a" },
+    { id: 39, songName: "Swami Avtariya", fileName: "39. Swami Avtariya.mp3" },
+    { id: 40, songName: "Vagya Re Vagya Re Gurubhakti Na", fileName: "40. vagya re Vagya re Gurubhakti Na.mp3" },
+    { id: 41, songName: "Rang Lagyo", fileName: "41. rang lagyo.mp3" },
+    { id: 42, songName: "Jivan Denara He Swami", fileName: "42. Jivan Denara He Swami.mp3" },
+    { id: 43, songName: "Phoolon Sa Chehra Tera", fileName: "43. Phoolon Sa Chehra tera.mp3" },
+    { id: 44, songName: "Teri Ajab Anokhi Chaal", fileName: "44. Teri Ajab anokhi Chaal.mp3" },
+    { id: 45, songName: "Naujawan Naujawan", fileName: "45.Naujawan Naujawan.mp3" },
+    { id: 46, songName: "Hilode Chadhya Haiya", fileName: "46.Hilode Chadhya Haiya.mp3" },
+    { id: 47, songName: "Atmiya Raas", fileName: "47.Atmiya Raas.mp3" },
+    { id: 48, songName: "Kanthee Re Bandhavi", fileName: "48. Kanthee Re Bandhavi.mp3" },
+    { id: 49, songName: "Bhaji Le Bhagwan", fileName: "49.Bhaji Le Bhagwan.mp3" },
+    { id: 50, songName: "Maru Mann Haricharan", fileName: "50. Maru Mann Haricharan.mp3" },
+    { id: 51, songName: "Mangal Bela", fileName: "51. mangal bela.m4a" },
+    { id: 52, songName: "Bade Acche Lagte Hai", fileName: "52.Bade Acche Lagte Hai.mp3" },
+    { id: 53, songName: "Thayu Hari Nu Aagman", fileName: "53.Thayu Hari Nu Aagman.mp3" },
+    { id: 54, songName: "Ange Ang Ma Hari Ne Dhaari", fileName: "54. Ange Ang ma..Hari ne dhaari.mp3" },
+    { id: 55, songName: "Tu Chale Mari Saath", fileName: "55.Tu chale mari saath.mp3" },
+    { id: 56, songName: "Tari Gunatit Sadhuta", fileName: "56. TARI GUNATIT SADHUTA.mp3" },
+    { id: 57, songName: "Mere Sang He Piya", fileName: "57.Mere Sang He Piya.mp3" },
+    { id: 58, songName: "Purna Akshardhami", fileName: "58.Purna Akshardhami.mp3" },
+    { id: 59, songName: "Eni Sadhutane Vaari Jau Re", fileName: "59.Eni Sadhutane Vaari Jau Re.....mp3" },
+    { id: 60, songName: "Hari Swami Aavya Re", fileName: "60.Hari Swami Aavya Re.mp3" }
   ];
+  
+  
   
   const generateRandomNumber = () => {
     if (availableNumbers.length === 0) {
@@ -97,6 +100,12 @@ function App() {
 
     setIsSpinning(true);
     setFullscreenSpin(true);
+    
+    // Start the spinning background music
+    if (spinAudioRef.current) {
+      spinAudioRef.current.currentTime = 0; // Reset to beginning
+      spinAudioRef.current.play().catch(e => console.error("Error playing spin sound:", e));
+    }
     
     // Simulate spinning animation with multiple random numbers
     let spinCount = 0;
@@ -132,7 +141,7 @@ function App() {
     const updatedAvailableNumbers = availableNumbers.filter(num => num !== selectedNumber);
     setAvailableNumbers(updatedAvailableNumbers);
     
-    // Clear last removed data since we've made a new selection
+    // Clear last removed data
     setLastRemovedNumber(null);
     setLastRemovedSong(null);
     
@@ -140,7 +149,6 @@ function App() {
     setTimeout(() => {
       setIsSpinning(false);
       
-      // After 2 more seconds, exit fullscreen mode with transition
       setTimeout(() => {
         setFullscreenSpin(false);
       }, 2000);
@@ -242,6 +250,13 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 to-indigo-800 text-white relative overflow-hidden">
+      {/* Add the spinning background music audio element */}
+      <audio 
+        ref={spinAudioRef} 
+        src="/songs/bg.mp3" // Make sure to add this file to your public folder
+        loop={false} // Loop the music during spinning
+      />
+      
       {/* Fullscreen spinning overlay */}
       {fullscreenSpin && (
         <div className={`fixed inset-0 bg-black/80 z-50 flex items-center justify-center transition-opacity duration-1000 ${isSpinning ? 'opacity-100' : 'opacity-90'}`}>
@@ -249,7 +264,7 @@ function App() {
             {currentNumber !== null ? (
               <span className="text-7xl font-bold">{currentNumber}</span>
             ) : (
-              <span className="text-4xl font-bold text-purple-300 text-center">Spin to Start</span>
+              <span className="text-4xl font-bold text-purple-300 text-center">0</span>
             )}
           </div>
         </div>
@@ -280,31 +295,18 @@ function App() {
       )}
 
       <header className="py-6 text-center">
-        <div className="flex flex-col items-center justify-center mb-4">
-          {logoUrl ? (
-            <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-pink-400 shadow-lg">
-              <img src={logoUrl} alt="Game Logo" className="w-full h-full object-cover" />
-            </div>
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-pink-500 to-purple-500 flex items-center justify-center mb-4 border-4 border-pink-400 shadow-lg">
-              <Music className="h-12 w-12" />
-            </div>
-          )}
-          <label className="cursor-pointer text-xs text-purple-300 hover:text-white mb-4">
-            <span className="underline">Change Logo</span>
-            <input 
-              type="file" 
-              accept="image/*" 
-              className="hidden" 
-              onChange={handleLogoUpload} 
-            />
-          </label>
+        <div className="flex items-center justify-center mb-4">
+          <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-pink-400 shadow-lg mr-4">
+            <img src="/hpym.jpg" alt="Game Logo" className="w-full h-full object-cover" />
+          </div>
+          <div className="flex flex-col">
+            <h1 className="text-4xl font-bold flex items-center justify-center gap-2">
+              <Music className="h-10 w-10" />
+              Musical Housie
+            </h1>
+          </div>
         </div>
-        <h1 className="text-4xl font-bold flex items-center justify-center gap-2">
-          <Music className="h-10 w-10" />
-          Musical Housie
-        </h1>
-        <p className="mt-2 text-purple-200">Spin the wheel and discover the music!</p>
+        <p className="mt-2 text-purple-200 text-center">Spin the wheel and discover the music!</p>
       </header>
 
       <main className="container mx-auto px-4 py-8">
@@ -328,7 +330,7 @@ function App() {
             </div>
             
             {/* Revert and Reset buttons in corners */}
-            <div className="absolute left-0 top-1/2 transform -translate-y-1/2">
+            <div className="absolute left-0 bottom-0 transform -translate-x-1/2 translate-y-1/2">
               <button
                 onClick={() => showConfirmationDialog('revert')}
                 disabled={selectedNumbers.length === 0 || isSpinning || fullscreenSpin}
@@ -341,7 +343,7 @@ function App() {
               </button>
             </div>
             
-            <div className="absolute right-0 top-1/2 transform -translate-y-1/2">
+            <div className="absolute right-0 bottom-0 transform translate-x-1/2 translate-y-1/2">
               <button
                 onClick={() => showConfirmationDialog('reset')}
                 disabled={selectedNumbers.length === 0 || isSpinning || fullscreenSpin}
@@ -361,7 +363,7 @@ function App() {
                 {currentNumber !== null ? (
                   <span className="text-7xl font-bold">{currentNumber}</span>
                 ) : (
-                  <span className="text-4xl font-bold text-purple-300">Spin to Start</span>
+                  <span className="text-7xl font-bold text-purple-200">0</span>
                 )}
               </div>
             </div>
@@ -375,7 +377,7 @@ function App() {
                   <Disc className="h-10 w-10 mr-3 text-pink-400" />
                   <div>
                     <p className="text-xl font-semibold">{currentSong.songName}</p>
-                    <p className="text-sm text-purple-300">Number: {currentSong.id}</p>
+                    <p className="text-sm text-purple-300">Number: <span className="font-bold">{currentSong.id}</span></p>
                   </div>
                 </div>
                 <button 
@@ -387,10 +389,12 @@ function App() {
               </div>
               <audio 
                 ref={audioRef} 
-                src={`/music/${currentSong.fileName}`}
+                src={`/songs/${currentSong.fileName}`}
                 onEnded={() => setIsPlaying(false)}
+                onError={(e) => console.error("Audio error:", e)}
               />
             </div>
+            
           )}
         </div>
 
