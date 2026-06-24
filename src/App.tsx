@@ -62,7 +62,7 @@ function App() {
   const songData: SongData[] = [
     { id: 1, songName: "Woh Kisna hai", fileName: "1. Woh Kisna hai.mp3" },
     { id: 2, songName: "Go Go Govinda", fileName: "2. Go Go Govinda.mp3" },
-    { id: 3, songName: "Shiv Tandav", fileName: "3. Shiv Tandav.mp3" },
+    { id: 3, songName: "Yaara Teri Yaari", fileName: "3. Yaara Teri Yaari.mp3" },
     { id: 4, songName: "Shree Ramji Padhare", fileName: "4. shri-ramji-padhare.mp3" },
     { id: 5, songName: "Mata Sherawali", fileName: "5. Mata sherawali.mp3" },
     { id: 6, songName: "Kariye Guru Gun Gan", fileName: "6. kariye guru gun gan.mp3" },
@@ -100,7 +100,7 @@ function App() {
     { id: 38, songName: "Padharya Padharya", fileName: "38. PADHARYA PADHARYA.m4a" },
     { id: 39, songName: "Swami Avtariya", fileName: "39. Swami Avtariya.mp3" },
     { id: 40, songName: "Vagya Re Vagya Re Gurubhakti Na", fileName: "40. vagya re Vagya re Gurubhakti Na.mp3" },
-    { id: 41, songName: "Rang Lagyo", fileName: "41. rang lagyo.mp3" },
+    { id: 41, songName: "He Bakrol Vasi", fileName: "41. He Bakrol vasi.mpeg.mp3" },
     { id: 42, songName: "Jivan Denara He Swami", fileName: "42. Jivan Denara He Swami.mp3" },
     { id: 43, songName: "Phoolon Sa Chehra Tera", fileName: "43. Phoolon Sa Chehra tera.mp3" },
     { id: 44, songName: "Teri Ajab Anokhi Chaal", fileName: "44. Teri Ajab anokhi Chaal.mp3" },
@@ -178,20 +178,26 @@ function App() {
     }, 500);
   };
 
-  const playSong = () => {
-    if (audioRef.current && currentSong) {
-      if (isPlaying) {
-        audioRef.current.pause();
-        setIsPlaying(false);
-      } else {
-        audioRef.current.play();
+  const playSong = async () => {
+    if (!audioRef.current || !currentSong) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+    } else {
+      try {
+        await audioRef.current.play();
         setIsPlaying(true);
+      } catch (e) {
+        console.error('Playback failed:', e);
       }
     }
   };
 
-  // Reset audio playing state when song changes
+  // When song changes, reload the audio element so it's ready to play immediately
   useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.pause();
+    audioRef.current.load();
     setIsPlaying(false);
   }, [currentSong]);
 
@@ -397,6 +403,7 @@ function App() {
               <audio 
                 ref={audioRef} 
                 src={`/songs/${currentSong.fileName}`}
+                preload="auto"
                 onEnded={() => setIsPlaying(false)}
                 onError={(e) => console.error("Audio error:", e)}
               />
