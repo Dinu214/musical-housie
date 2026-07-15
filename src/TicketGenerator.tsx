@@ -140,7 +140,7 @@ function ClassicTicket({ ticket, rows, cols }: TicketProps) {
                       {song.id}
                     </span>
                     <span style={{
-                      fontSize: '0.55rem', color: '#5C3A1E', fontWeight: 500,
+                      fontSize: '0.75rem', color: '#5C3A1E', fontWeight: 500,
                       lineHeight: 1.4, marginTop: 4, display: 'block', paddingBottom: 5,
                     }}>
                       {song.songName}
@@ -247,7 +247,7 @@ function RoyalTicket({ ticket, rows, cols }: TicketProps) {
                       {song.id}
                     </span>
                     <span style={{
-                      fontSize: '0.55rem', color: '#888', fontWeight: 500,
+                      fontSize: '0.75rem', color: '#888', fontWeight: 500,
                       lineHeight: 1.4, marginTop: 4, display: 'block', paddingBottom: 5,
                     }}>
                       {song.songName}
@@ -352,7 +352,7 @@ function ModernTicket({ ticket, rows, cols }: TicketProps) {
                       {song.id}
                     </span>
                     <span style={{
-                      fontSize: '0.5rem', color: '#596A7A', fontWeight: 500,
+                      fontSize: '0.75rem', color: '#596A7A', fontWeight: 500,
                       lineHeight: 1.4, marginTop: 4, display: 'block', paddingBottom: 5,
                     }}>
                       {song.songName}
@@ -463,7 +463,7 @@ function FestiveTicket({ ticket, rows, cols }: TicketProps) {
                       {song.id}
                     </span>
                     <span style={{
-                      fontSize: '0.55rem', color: '#6B5410', fontWeight: 500,
+                      fontSize: '0.75rem', color: '#6B5410', fontWeight: 500,
                       lineHeight: 1.4, marginTop: 4, display: 'block', paddingBottom: 5,
                     }}>
                       {song.songName}
